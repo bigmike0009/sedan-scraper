@@ -9,7 +9,7 @@ on:
       - driverfiles/**
 
 env:
-  bucket: arn:aws:s3:::sedan-scraper-artifacts
+  bucket: s3://sedan-scraper-artifacts
 jobs:
 
   deploy_source:
@@ -26,5 +26,5 @@ jobs:
           aws-region: us-east-1
 
       - name: Deploy artifacts to S3 bucket
-        run: aws s3 sync "./driverfiles" "$bucket" --cache-control "max-age=0, must-revalidate"
+        run: aws s3 sync "./driverfiles" "$bucket" --recursive --cache-control "max-age=0, must-revalidate"
   

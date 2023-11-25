@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .increase {
+      color: green;
+      font-weight: bold;
+    }
+
+    .decrease {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Car Price Changes</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Car Model</th>
+        <th>Previous Price</th>
+        <th>New Price</th>
+        <th>Change</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Honda Accord</td>
+        <td>$25,000</td>
+        <td class="increase">$27,000</td>
+        <td class="increase">+$2,000</td>
+      </tr>
+      <tr>
+        <td>Toyota Camry</td>
+        <td>$24,500</td>
+        <td class="decrease">$23,000</td>
+        <td class="decrease">-$1,500</td>
+      </tr>
+      <!-- Add more rows for other car models -->
+    </tbody>
+  </table>
+
+</body>
+</html>

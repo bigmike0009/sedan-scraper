@@ -30,7 +30,7 @@ def parse_car_info(car_string):
 
     return car_info
     
-def scrapeSe(comparisonDict):
+def scrapeSe(comparisonDict, resultCsv):
     driver = create_driver()
     pages_remaining = True
     page=1
@@ -77,7 +77,19 @@ def scrapeSe(comparisonDict):
             
         page = page + 1
         
-    return comparisonDict
+    return comparisonDict, resultCSV
+
+def pullPrevRunData(comparisonDict, resultCsv):
+    previousRunData = read_csv_from_s3('sedan-scraper-data', 'secars_latest.csv')    
+        
+    for car in previousRunData:
+        if car[0] in comparisonDict.keys():
+            #if the car is still on the site
+            comparisonDict[car[0]]['old_price'] = car[2]
+        else:
+            comparisonDict[car[0]] = {'new_price':-1, 'old_price':car[2], 'title':car[1], 'subtitle':car[3]}
+
+    return comparisonDict, resultCsv
 
 def lambda_handler(event, context):
     
@@ -88,23 +100,11 @@ def lambda_handler(event, context):
     
     try:
 
-
-        
-        
         resultCsv = [['VIN', 'Title', 'Price', 'Subtitle', 'Promo Text', 'Details', 'Engine','Transmission','Miles','Exterior','Interior','Stock #']]
         comparisonDict={}
         
-        comparisonDict = scrapeSe(comparisonDict)
-        
-            
-        previousRunData = read_csv_from_s3('sedan-scraper-data', 'secars_latest.csv')    
-        
-        for car in previousRunData:
-            if car[0] in comparisonDict.keys():
-                #if the car is still on the site
-                comparisonDict[car[0]]['old_price'] = car[2]
-            else:
-                comparisonDict[car[0]] = {'new_price':-1, 'old_price':car[2], 'title':car[1], 'subtitle':car[3]}
+        comparisonDict, resultCsv = scrapeSe(comparisonDict, resultCsv)
+        comparisonDict, resultCsv = pullPrevRunData(comparisonDict, resultCsv)
                 
         email_type, email_message = format_html(comparisonDict)
         print(email_type)
@@ -116,19 +116,13 @@ def lambda_handler(event, context):
         grant_public_read_access('sedan-scraper-data', 'secars_latest.csv')
         
         if email_type == 'Text':
-            #notification += 'No price updates!\n\n'
             print('Sending no update email')
             send_email(f'SECAR: No update {last_run}', email_type, email_message, ['2022.allcen@gmail.com'], '2022.allcen@gmail.com')
     
         else:
-            #notification+='Download price list: https://sedan-scraper-data.s3.amazonaws.com/secars_latest.csv\n' 
             print('Sending update email')
 
             send_email(f'SECAR: update {last_run}', email_type, email_message, distribution_list, '2022.allcen@gmail.com')
-    
-
-    
-    
     
         return {
             'statusCode': 200,

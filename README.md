@@ -2,7 +2,7 @@
 
 This is a comissioned data subscription service for a car dealership in Central Florida. Notifies dealership on price and inventory changes in their competitor dealerships.
 
-![Project]([https://zak-rentals.s3.amazonaws.com/before.png](https://zak-rentals.s3.amazonaws.com/secaremail.png))
+![Project](https://zak-rentals.s3.amazonaws.com/secaremail.png)
 
 ## Table of Contents
 

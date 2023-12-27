@@ -20,12 +20,13 @@ It leverages selenium web scraping, DBFS stored in S3 and  simple email service 
 
 - Inventory state stored in S3 dbfs, allowing additional visibility to customer as needed
 - Web driver files are contained in s3 and loaded into the container as a lambda layer
-- CICD deployment of web artifacts as well as AWS lambda
-- Serverless instances of selenium webscraper that can be spun up and run on automated schedule
-- HTML formatted notification email as part of our process
+- CICD deployment of web artifacts and python code
+- Serverless instances of selenium webscraper are spun up on a schedule
+- HTML customizable notification emails
 - Cost optimized runtime environment with adjustable scheduling
 
 ## Infrastructure
 
 AWS S3 is used for artifact and data storage. 
-The code is deployed into AWS lambda where we can scehdule it using Amazon Eventbridge subscriptions.
+The code is deployed into AWS lambda where we specify python environment, dependencies, and secret keys
+We can schedule lambda runs using Amazon Eventbridge subscriptions.

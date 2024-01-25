@@ -10,7 +10,7 @@ def parse_car_info(car_string):
     """
     Parse car information from a string and return a dictionary.
     """
-    car_info = {}
+    car_info = {'Engine':'','Transmission':'','Miles':'','Exterior':'','Interior':'','Stock #':'',}
     lines = car_string.split('\n')
     
     for line in lines:
@@ -52,7 +52,7 @@ def scrape_se(comparison_dict, result_csv):
 
             price = car_listing.find_element(By.CLASS_NAME, 'money-sign-disp').text
             price = ''.join(char for char in price if char.isdigit())
-
+            
             result_csv.append([vin_number, title, price, subtitle, promo_text, detail_map['Engine'], detail_map['Transmission'], detail_map['Miles'], detail_map['Exterior'], detail_map['Interior'], detail_map['Stock #']])
             comparison_dict[vin_number] = {'new_price': price, 'title': title, 'subtitle': subtitle}
 

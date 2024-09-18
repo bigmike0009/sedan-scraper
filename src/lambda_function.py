@@ -79,7 +79,7 @@ def lambda_handler(event, context):
     Lambda function handler.
     """
     if 'env' in event and event['env'] == 'prod':
-        distribution_list = ['mikea0009@gmail.com', 'Jd3@tomlinsonmotorco.com']
+        distribution_list = ['Tmc@atlantic.net','mikea0009@gmail.com', 'Jd3@tomlinsonmotorco.com']
     else:
         distribution_list = ['2022.allcen@gmail.com']
 

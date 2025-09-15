@@ -1,6 +1,6 @@
 import json
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 from headless_chrome import create_driver
 from selenium.webdriver.common.by import By
 from botofuncs import read_csv_from_s3, upload_csv_to_s3, duplicate_file_in_s3, get_last_modified_date, send_email, grant_public_read_access
@@ -79,7 +79,8 @@ def lambda_handler(event, context):
     Lambda function handler.
     """
     if 'env' in event and event['env'] == 'prod':
-        distribution_list = ['Tmc@atlantic.net','mikea0009@gmail.com', 'Jd3@tomlinsonmotorco.com']
+        distribution_list = ['Tmc@atlantic.net','mikea0009@gmail.com', 'Jd3@tomlinsonmotorco.com', 'Jcarlton@tomlinsonmotorco.com', 'Taylor@tomlinsonmotorco.com']
+        #distribution_list = ['mikea0009@gmail.com']
     else:
         distribution_list = ['2022.allcen@gmail.com']
 
@@ -95,16 +96,19 @@ def lambda_handler(event, context):
         print(email_message)
 
         last_run = get_last_modified_date('sedan-scraper-data', 'secars_latest.csv')
+        print(f'last_run: {last_run}')
+        email_header_time = (datetime.now() - timedelta(hours=5)).strftime('%b-%d %I:%M%p')
+        print(f'email time: {email_header_time}')
         duplicate_file_in_s3('sedan-scraper-data', 'secars_latest.csv', 'sedan-scraper-data', f'secars_{last_run}.csv')
         upload_csv_to_s3(result_csv, 'sedan-scraper-data', 'secars_latest.csv')
         grant_public_read_access('sedan-scraper-data', 'secars_latest.csv')
 
         if email_type == 'Text':
-            print('Sending no update email')
-            send_email(f'SECAR: No update {last_run}', email_type, email_message, ['2022.allcen@gmail.com'], '2022.allcen@gmail.com')
+            print('No email to send update for')
+            #send_email(f'SECAR: No update {last_run}', email_type, email_message, ['2022.allcen@gmail.com'], '2022.allcen@gmail.com')
         else:
             print('Sending update email')
-            send_email(f'SECAR: update {last_run}', email_type, email_message, distribution_list, '2022.allcen@gmail.com')
+            send_email(f'SECAR: update {email_header_time}', email_type, email_message, distribution_list, '2022.allcen@gmail.com')
 
         return {
             'statusCode': 200,
@@ -112,7 +116,7 @@ def lambda_handler(event, context):
         }
 
     except Exception as e:
-        curr_time = datetime.now().strftime('%b-%d %I:%M%p')
+        curr_time = (datetime.now() - timedelta(hours=5)).strftime('%b-%d %I:%M%p')
         print(traceback.format_exc())
         send_email(f'SECAR: Failure {curr_time}', 'Text', traceback.format_exc(), ['2022.allcen@gmail.com'], '2022.allcen@gmail.com')
         return {

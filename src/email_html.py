@@ -4,111 +4,77 @@ def format_as_dollar_amount(number):
     if isinstance(number, str) and number.isdigit():
         number = int(number)
         
-    # Set the locale to the user's default setting
-    locale.setlocale(locale.LC_ALL, '')
-
-    # Format the number as a dollar amount
+    locale.setlocale(locale.LC_ALL, '')  # Set the locale to the user's default setting
     formatted_amount = locale.currency(number, grouping=True)
-
     return formatted_amount
 
 template = '''
-  <style>
-    body {{
-      font-family: Arial, sans-serif;
-    }}
+<body style="font-family: Arial, sans-serif;">
 
-    table {{
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }}
+  <h2 style="text-align: left; color: #333;">Car Price Changes</h2>
 
-    th, td {{
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: left;
-    }}
-
-    th {{
-      background-color: #f2f2f2;
-    }}
-
-    .increase {{
-      color: green;
-      font-weight: bold;
-    }}
-
-    .decrease {{
-      color: red;
-      font-weight: bold;
-    }}
-  </style>
-</head>
-<body>
-
-  <h2>Car Price Changes</h2>
-
-  <table>
+  <table style="width: 100%; border-collapse: collapse; margin-top: 20px; border: 2px solid #ddd;">
     <thead>
       <tr>
-        <th>Car Model</th>
-        <th>Previous Price</th>
-        <th>New Price</th>
-        <th>Change</th>
+        <th style="background-color: #f2f2f2; border: 1px solid #ddd; padding: 12px 20px; text-align: left;">VIN</th>
+        <th style="background-color: #f2f2f2; border: 1px solid #ddd; padding: 12px 20px; text-align: left;">Car Model</th>
+        <th style="background-color: #f2f2f2; border: 1px solid #ddd; padding: 12px 20px; text-align: left;">Previous Price</th>
+        <th style="background-color: #f2f2f2; border: 1px solid #ddd; padding: 12px 20px; text-align: left;">New Price</th>
+        <th style="background-color: #f2f2f2; border: 1px solid #ddd; padding: 12px 20px; text-align: left;">Change</th>
       </tr>
     </thead>
     <tbody>
       {rows}
-      <!-- Add more rows for other car models -->
     </tbody>
   </table>
 
 </body>
 '''
 
+# Define a variable for common TD styles
+td_style = "border: 1px solid #ddd; padding: 12px 20px;"
+
 def format_html(comparisonDict):
     notification = ''
-    for car in comparisonDict:
-            if comparisonDict[car]['new_price'] == -1: #car has sold
+    for vin, car_data in comparisonDict.items():
+        title = car_data.get('title', '')
+        subtitle = car_data.get('subtitle', '')
+        old_price = car_data.get('old_price')
+        new_price = car_data.get('new_price')
+
+        if new_price == -1:  # Car has sold
+            notification += f'''
+            <tr>
+                <td style="{td_style}">{vin}</td>
+                <td style="{td_style}">{title} - {subtitle}</td>
+                <td style="{td_style}">{format_as_dollar_amount(old_price)}</td>
+                <td style="{td_style}">--</td>
+                <td style="{td_style} color: red; font-weight: bold;">No Longer Listed</td>
+            </tr>\n'''
+        elif old_price is None:  # Car is brand new
+            notification += f'''
+            <tr>
+                <td style="{td_style}">{vin}</td>
+                <td style="{td_style}">{title} - {subtitle}</td>
+                <td style="{td_style}">--</td>
+                <td style="{td_style}">{format_as_dollar_amount(new_price)}</td>
+                <td style="{td_style} color: blue; font-weight: bold;">Initial Listing</td>
+            </tr>\n'''
+        else:
+            if old_price != new_price:
+                change_amount = int(new_price) - int(old_price)
+                change_color = "green" if change_amount > 0 else "red"
+                change_sign = "+" if change_amount > 0 else ""
+
                 notification += f'''
                 <tr>
-                    <td>{comparisonDict[car]['title'] + ' - ' + comparisonDict[car]['subtitle']}</td>
-                    <td>{format_as_dollar_amount(comparisonDict[car]['old_price'])}</td>
-                    <td >--</td>
-                    <td class="decrease">No Longer Listed</td>
+                    <td style="{td_style}">{vin}</td>
+                    <td style="{td_style}">{title} - {subtitle}</td>
+                    <td style="{td_style}">{format_as_dollar_amount(old_price)}</td>
+                    <td style="{td_style} color: {change_color}; font-weight: bold;">{format_as_dollar_amount(new_price)}</td>
+                    <td style="{td_style} color: {change_color}; font-weight: bold;">{change_sign}{format_as_dollar_amount(change_amount)}</td>
                 </tr>\n'''
-            elif not 'old_price' in comparisonDict[car]: #car is brand new
-                notification += f'''
-                <tr>
-                    <td>{comparisonDict[car]['title'] + ' - ' + comparisonDict[car]['subtitle']}</td>
-                    <td>--</td>
-                    <td >{format_as_dollar_amount(comparisonDict[car]['new_price'])}</td>
-                    <td class="decrease">Initial Listing</td>
-                </tr>\n'''
-            else:
-                if not comparisonDict[car]['old_price'] == comparisonDict[car]['new_price']:
-                    if comparisonDict[car]['old_price'] > comparisonDict[car]['new_price']: #price decrease
-                        notification += f'''
-                        <tr>
-                            <td>{comparisonDict[car]['title'] + ' - ' + comparisonDict[car]['subtitle']}</td>
-                            <td>{format_as_dollar_amount(comparisonDict[car]['old_price'])}</td>
-                            <td class="decrease">{format_as_dollar_amount(comparisonDict[car]['new_price'])}</td>
-                            <td class="decrease">{format_as_dollar_amount(int(comparisonDict[car]['new_price']) - int(comparisonDict[car]['old_price']))}</td>
-                        </tr>\n'''
-                    else: #price increase
-                        notification += f'''
-                        <tr>
-                            <td>{comparisonDict[car]['title'] + ' - ' + comparisonDict[car]['subtitle']}</td>
-                            <td>{format_as_dollar_amount(comparisonDict[car]['old_price'])}</td>
-                            <td class="increase">{format_as_dollar_amount(comparisonDict[car]['new_price'])}</td>
-                            <td class="increase">+{format_as_dollar_amount(int(comparisonDict[car]['new_price']) - int(comparisonDict[car]['old_price']))}</td>
-                        </tr>\n'''
 
-                         
-                    #notification += 'Price change for ' + comparisonDict[car]['title'] + ' - ' + comparisonDict[car]['subtitle'] + ': ' + format_as_dollar_amount(comparisonDict[car]['old_price']) +'->'+format_as_dollar_amount(comparisonDict[car]['new_price'])
-
-    if notification == '':
+    if not notification:
         return 'Text', 'No Inventory changes found'
-    else:
-        return 'Html', template.format(rows=notification)
+    return 'Html', template.format(rows=notification)
